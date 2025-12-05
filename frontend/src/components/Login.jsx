@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
+import axios from 'axios';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -12,12 +13,32 @@ const Login = () => {
         e.preventDefault();
         setError('');
 
-        // Simulation d'authentification
-        // TODO: Remplacer par un véritable appel API
-        if (email === 'admin@example.com' && password === 'password') {
-            navigate('/dashboard');
-        } else {
-            setError('Identifiants invalides (essayez admin@example.com / password)');
+        try {
+            const response = await axios.post('http://localhost:8000/api/login', {
+                email,
+                password
+            });
+
+            const { access_token, role } = response.data;
+
+            // Store token (basic implementation)
+            localStorage.setItem('token', access_token);
+            localStorage.setItem('role', role);
+
+            // Redirect based on role
+            if (role === 'admin') {
+                navigate('/dashboard');
+            } else if (role === 'etudiant') {
+                navigate('/espace-etudiant');
+            } else if (role === 'professeur') {
+                navigate('/espace-professeur');
+            } else {
+                navigate('/');
+            }
+
+        } catch (err) {
+            console.error("Login error:", err);
+            setError('Identifiants invalides.');
         }
     };
 

@@ -25,7 +25,6 @@ class EtudiantController extends Controller
             'mot_de_passe' => 'required|min:6',
         ]);
 
-        // 2. Creation: Mass assign the validated data
         $etudiant = Etudiant::create($fields);
 
         // 3. Response: Return the created object with HTTP 201 (Created)

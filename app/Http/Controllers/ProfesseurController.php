@@ -7,59 +7,53 @@ use Illuminate\Http\Request;
 
 class ProfesseurController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // List all professors
     public function index()
     {
-        //
+        return response()->json(Professeur::all(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Create a new professor
     public function store(Request $request)
     {
-        //
+        $fields = $request->validate([
+            'nom' => 'required|string|max:255',
+            'email' => 'required|email|unique:professeurs',
+            'mot_de_passe' => 'required|min:6',
+        ]);
+
+        $professeur = Professeur::create($fields);
+
+        return response()->json($professeur, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Professeur $professeur)
+    // Show a specific professor
+    public function show($id)
     {
-        //
+        $professeur = Professeur::findOrFail($id);
+        return response()->json($professeur, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Professeur $professeur)
+    // Update a professor
+    public function update(Request $request, $id)
     {
-        //
+        $professeur = Professeur::findOrFail($id);
+
+        $fields = $request->validate([
+            'nom' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:professeurs,email,' . $id,
+            'mot_de_passe' => 'sometimes|min:6',
+        ]);
+
+        $professeur->update($fields);
+
+        return response()->json($professeur, 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Professeur $professeur)
+    // Delete a professor
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Professeur $professeur)
-    {
-        //
+        Professeur::destroy($id);
+        return response()->json(['message' => 'Professeur supprimé'], 200);
     }
 }
