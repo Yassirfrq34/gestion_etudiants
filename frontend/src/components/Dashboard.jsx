@@ -5,8 +5,14 @@ import { useNavigate, Link } from 'react-router-dom';
 const Dashboard = () => {
     const navigate = useNavigate();
 
+    const result = localStorage.getItem('user');
+    const user = result ? JSON.parse(result) : null;
+    // Admins usually have 'name' in the User model, not 'nom'/'prenom'
+    const adminName = user ? user.name : "Administrateur";
+
     const handleLogout = () => {
         // TODO: Clear auth tokens
+        localStorage.clear();
         navigate('/');
     };
 
@@ -29,7 +35,7 @@ const Dashboard = () => {
                 </Container>
             </Navbar>
             <Container className="mt-5">
-                <h1 className="mb-4">Tableau de Bord</h1>
+                <h1 className="mb-4">Bonjour, {adminName} !</h1>
                 <p className="lead">Bienvenue dans le système de gestion des étudiants.</p>
 
                 <div className="row mt-4">

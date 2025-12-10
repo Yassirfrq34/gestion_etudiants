@@ -17,11 +17,14 @@ import SaisieNotes from './components/SaisieNotes';
 
 import Layout from './components/Layout';
 
+import Register from './components/Register';
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Protected Routes wrapped in Layout */}
         <Route element={<Layout />}>

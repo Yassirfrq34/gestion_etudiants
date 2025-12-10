@@ -8,32 +8,31 @@ use App\Models\Professeur;
 use App\Models\Matiere;
 use App\Models\Note;
 use App\Models\Planning;
-use App\Models\Administrateur;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create the Admin
-        // 1. Create the Admin (User table)
+        // Création du compte Admin principal
         \App\Models\User::create([
             'name' => 'Admin Principal',
             'email' => 'admin@gmail.com',
-            'password' => bcrypt('password') // User model uses Hash by default usually, but seeder needs hashing if model doesn't auto-hash
+            'password' => bcrypt('password')
         ]);
 
-        // 2. Create Subjects (Matières)
+        // Ajout des matières enseignées
         $math = Matiere::create(['nom' => 'Mathématiques']);
         $info = Matiere::create(['nom' => 'Informatique']);
         $phys = Matiere::create(['nom' => 'Physique']);
         $eng = Matiere::create(['nom' => 'Anglais']);
 
-        // 3. Create Professors
+        // Ajout de quelques profs pour tester
         $prof1 = Professeur::create(['nom' => 'Dr. SABRAOUI', 'email' => 'sabraoui@univ.com', 'mot_de_passe' => 'password']);
         $prof2 = Professeur::create(['nom' => 'Pr. ALAMI', 'email' => 'alami@univ.com', 'mot_de_passe' => 'password']);
         $prof3 = Professeur::create(['nom' => 'Pr. BENANI', 'email' => 'benani@univ.com', 'mot_de_passe' => 'password']);
         $prof4 = Professeur::create(['nom' => 'Pr. test', 'email' => 'prof@gmail.com', 'mot_de_passe' => 'password']);
-        // 4. Create Students
+
+        // Création d'une liste d'étudiants fictifs
         $students = [];
         for ($i = 1; $i <= 5; $i++) {
             $students[] = Etudiant::create([
@@ -44,6 +43,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Mon compte étudiant perso pour tester
         Etudiant::create([
             'nom' => 'frq',
             'prenom' => 'yassir',
@@ -51,12 +51,7 @@ class DatabaseSeeder extends Seeder
             'mot_de_passe' => 'password'
         ]);
 
-
-
-
-
-        // 5. Assign Grades (Notes)
-        // Give the first student a grade in Math from Prof 1
+        // Attribution de quelques notes
         Note::create([
             'valeur' => 15.5,
             'etudiant_id' => $students[0]->id,
@@ -64,7 +59,6 @@ class DatabaseSeeder extends Seeder
             'professeur_id' => $prof1->id
         ]);
 
-        // Give the second student a grade in Info from Prof 1
         Note::create([
             'valeur' => 18.0,
             'etudiant_id' => $students[1]->id,
@@ -72,7 +66,7 @@ class DatabaseSeeder extends Seeder
             'professeur_id' => $prof1->id
         ]);
 
-        // 6. Create Schedule (Planning)
+        // Exemple de planning
         Planning::create([
             'jour' => '2025-10-15',
             'horaire' => '08:30:00',

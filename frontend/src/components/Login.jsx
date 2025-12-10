@@ -19,13 +19,12 @@ const Login = () => {
                 password
             });
 
-            const { access_token, role } = response.data;
+            const { access_token, role, user } = response.data;
 
-            // Store token (basic implementation)
             localStorage.setItem('token', access_token);
             localStorage.setItem('role', role);
+            localStorage.setItem('user', JSON.stringify(user));
 
-            // Redirect based on role
             if (role === 'admin') {
                 navigate('/dashboard');
             } else if (role === 'etudiant') {
@@ -37,7 +36,7 @@ const Login = () => {
             }
 
         } catch (err) {
-            console.error("Login error:", err);
+            console.error(err);
             setError('Identifiants invalides.');
         }
     };
@@ -75,6 +74,9 @@ const Login = () => {
                         <Button variant="primary" type="submit" className="w-100 py-2 fw-bold">
                             Se connecter
                         </Button>
+                        <div className="mt-3 text-center">
+                            <p className="mb-0">Pas encore de compte ? <a href="/register" className="text-primary text-decoration-none fw-bold">Créer un compte</a></p>
+                        </div>
                     </Form>
                 </Card.Body>
             </Card>

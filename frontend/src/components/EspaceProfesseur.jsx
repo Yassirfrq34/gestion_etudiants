@@ -5,9 +5,13 @@ import { useNavigate } from 'react-router-dom';
 const EspaceProfesseur = () => {
     const navigate = useNavigate();
 
+    const result = localStorage.getItem('user');
+    const user = result ? JSON.parse(result) : null;
+    const profName = user ? `${user.prenom} ${user.nom}` : "Professeur";
+
     return (
         <Container className="mt-5">
-            <h2 className="mb-4">Espace Professeur</h2>
+            <h2 className="mb-4">Bonjour, {profName} !</h2>
             <Row>
                 <Col md={4} className="mb-3">
                     <Card>

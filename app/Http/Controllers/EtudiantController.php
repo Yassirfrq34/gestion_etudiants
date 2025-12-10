@@ -64,7 +64,8 @@ class EtudiantController extends Controller
 
     public function destroy($id)
     {
-        Etudiant::destroy($id);
+        $etudiant = Etudiant::findOrFail($id);
+        $etudiant->delete();
         return response()->json(['message' => 'Étudiant supprimé'], 200);
     }
 }

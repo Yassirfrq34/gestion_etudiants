@@ -7,18 +7,12 @@ use Illuminate\Http\Request;
 
 class MatiereController extends Controller
 {
-    /**
-     * GOAL: Get all subjects (e.g., Math, History, Java).
-     * USED BY: Admin (to manage them) and Students (to see what they study).
-     */
+    
     public function index()
     {
         return response()->json(Matiere::all(), 200);
     }
 
-    /**
-     * GOAL: Create a new subject.
-     */
     public function store(Request $request)
     {
         $fields = $request->validate([
@@ -30,9 +24,6 @@ class MatiereController extends Controller
         return response()->json($matiere, 201);
     }
 
-    /**
-     * GOAL: Show one subject.
-     */
     public function show($id)
     {
         $matiere = Matiere::find($id);
@@ -42,9 +33,6 @@ class MatiereController extends Controller
         return response()->json($matiere, 200);
     }
 
-    /**
-     * GOAL: Update a subject name.
-     */
     public function update(Request $request, $id)
     {
         $matiere = Matiere::find($id);
@@ -61,9 +49,6 @@ class MatiereController extends Controller
         return response()->json($matiere, 200);
     }
 
-    /**
-     * GOAL: Delete a subject.
-     */
     public function destroy($id)
     {
         Matiere::destroy($id);
