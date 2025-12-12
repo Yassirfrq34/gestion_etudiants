@@ -53,7 +53,13 @@ class ProfesseurController extends Controller
     // Delete a professor
     public function destroy($id)
     {
-        Professeur::destroy($id);
-        return response()->json(['message' => 'Professeur supprimé'], 200);
+        $professeur = Professeur::findOrFail($id);
+
+        // Cascade delete: Delete all notes entered by this professor
+        // This is necessary to prevent foreign key constraint violations
+        $professeur->notes()->delete();
+
+        $professeur->delete();
+        return response()->json(['message' => 'Professeur supprimé avec succès'], 200);
     }
 }

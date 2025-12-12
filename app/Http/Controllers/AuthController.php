@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Administrateur;
 use App\Models\Etudiant;
 use App\Models\Professeur;
 use Illuminate\Support\Facades\Hash;
@@ -21,44 +22,63 @@ class AuthController extends Controller
         $email = $request->email;
         $password = $request->password;
 
-        // On vérifie d'abord si c'est un administrateur
-        $user = User::where('email', $email)->first();
-        if ($user && Hash::check($password, $user->password)) {
-            $token = $user->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'role' => 'admin',
-                'user' => $user
+        $authenticatedUser = null;
+        $role = null;
+
+        // 1. Check Admin
+        // Use Administrateur model, not User.
+        $user = Administrateur::where('email', $email)->first();
+        if ($user && Hash::check($password, $user->mot_de_passe)) {
+            $authenticatedUser = $user;
+            $role = 'admin';
+        }
+
+        // 2. Check Student
+        if (!$authenticatedUser) {
+            \Illuminate\Support\Facades\Log::info('Checking Etudiants table...');
+            $etudiant = Etudiant::where('email', $email)->first();
+            if ($etudiant) {
+                \Illuminate\Support\Facades\Log::info('Student found: ' . $etudiant->id);
+                // Note: Etudiant model uses 'mot_de_passe'. Seed uses Hash::make.
+                if (Hash::check($password, $etudiant->mot_de_passe)) {
+                    \Illuminate\Support\Facades\Log::info('Student password match');
+                    $authenticatedUser = $etudiant;
+                    $role = 'etudiant';
+                } else {
+                    \Illuminate\Support\Facades\Log::info('Student password mismatch');
+                }
+            } else {
+                \Illuminate\Support\Facades\Log::info('Student not found in DB');
+            }
+        }
+
+        // 3. Check Professor
+        if (!$authenticatedUser) {
+            $professeur = Professeur::where('email', $email)->first();
+            // Note: Professeur model might use plain text or hash. 
+            // Reverted code checked `$professeur->mot_de_passe === $password`.
+            // But Seed used `Hash::make`. We should check Hash first, if fail, try plain?
+            // Let's stick to what worked or what seed implies. Seed implies Hash.
+            // But strict revert code used ===. I will use Hash::check because Seed uses it.
+            if ($professeur && Hash::check($password, $professeur->mot_de_passe)) {
+                $authenticatedUser = $professeur;
+                $role = 'professeur';
+            }
+        }
+
+        if (!$authenticatedUser) {
+            throw ValidationException::withMessages([
+                'email' => ['Les identifiants sont incorrects.'],
             ]);
         }
 
-        // Si ce n'est pas un admin, on regarde si c'est un étudiant
-        $etudiant = Etudiant::where('email', $email)->first();
-        if ($etudiant && $etudiant->mot_de_passe === $password) {
-            $token = $etudiant->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'role' => 'etudiant',
-                'user' => $etudiant
-            ]);
-        }
+        $token = $authenticatedUser->createToken('auth_token')->plainTextToken;
 
-        // Enfin, on vérifie si c'est un prof
-        $professeur = Professeur::where('email', $email)->first();
-        if ($professeur && $professeur->mot_de_passe === $password) {
-            $token = $professeur->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'role' => 'professeur',
-                'user' => $professeur
-            ]);
-        }
-
-        throw ValidationException::withMessages([
-            'email' => ['Les identifiants sont incorrects.'],
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'role' => $role,
+            'user' => $authenticatedUser
         ]);
     }
 

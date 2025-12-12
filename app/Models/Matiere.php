@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Matiere extends Model
 {
+    protected $fillable = ['nom'];
+
     public function notes()
     {
         return $this->hasMany(Note::class); // Une matière peut avoir plusieurs notes

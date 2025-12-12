@@ -2,10 +2,12 @@ import React from 'react';
 import { Container, Table, Card, Badge, Row, Col } from 'react-bootstrap';
 
 const Notes = () => {
+    const user = JSON.parse(localStorage.getItem('user')) || { nom: 'Étudiant', prenom: 'Inconnu', id: 'N/A' };
+
     // Mock Data: 1 Student, Multiple Grades
     const studentInfo = {
-        name: "Dupont Jean",
-        id: "ETU-2023-042",
+        name: `${user.prenom} ${user.nom}`, // Dynamic Name
+        id: `ETU-${user.id || '2023'}`,
         class: "Licence 2 - Informatique"
     };
 

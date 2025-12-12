@@ -46,7 +46,7 @@ const EspaceProfesseur = () => {
                             <Card.Text>
                                 Quitter l'espace professeur.
                             </Card.Text>
-                            <Button variant="danger" onClick={() => navigate('/')}>
+                            <Button variant="danger" onClick={() => { localStorage.clear(); navigate('/'); }}>
                                 Se déconnecter
                             </Button>
                         </Card.Body>

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class MatiereController extends Controller
 {
-    
+
     public function index()
     {
         return response()->json(Matiere::all(), 200);
@@ -17,6 +17,9 @@ class MatiereController extends Controller
     {
         $fields = $request->validate([
             'nom' => 'required|string|unique:matieres|max:255',
+        ], [
+            'nom.unique' => 'Cette matière existe déjà.',
+            'nom.required' => 'Le nom de la matière est obligatoire.'
         ]);
 
         $matiere = Matiere::create($fields);

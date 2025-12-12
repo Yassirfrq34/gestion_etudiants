@@ -17,7 +17,19 @@ const AddMatiere = () => {
             navigate('/matieres');
         } catch (err) {
             console.error("Erreur lors de l'ajout:", err);
-            setError("Erreur lors de l'ajout. Cette matière existe peut-être déjà.");
+            if (err.response && err.response.data && err.response.data.message) {
+                // Check if it's a validation error (Laravel defaults to "The given data was invalid.")
+                // and if specific field errors exist
+                if (err.response.data.errors) {
+                    // Extract the first error message
+                    const firstError = Object.values(err.response.data.errors).flat()[0];
+                    setError(firstError);
+                } else {
+                    setError(err.response.data.message);
+                }
+            } else {
+                setError("Erreur lors de l'ajout. Veuillez réessayer.");
+            }
         }
     };
 

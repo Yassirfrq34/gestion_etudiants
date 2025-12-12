@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Alert, Card } from 'react-bootstrap';
+import { Container, Table, Button, Alert, Card, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Professeurs = () => {
     const [professeurs, setProfesseurs] = useState([]);
     const [error, setError] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [profToDelete, setProfToDelete] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,13 +23,25 @@ const Professeurs = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Voulez-vous vraiment supprimer ce professeur ?')) {
-            try {
-                await axios.delete(`http://localhost:8000/api/professeurs/${id}`);
-                setProfesseurs(professeurs.filter(prof => prof.id !== id));
-            } catch (err) {
-                setError(err.message);
+    const handleDeleteClick = (id) => {
+        setProfToDelete(id);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!profToDelete) return;
+
+        try {
+            await axios.delete(`http://localhost:8000/api/professeurs/${profToDelete}`);
+            setProfesseurs(professeurs.filter(prof => prof.id !== profToDelete));
+            setShowDeleteModal(false);
+            setProfToDelete(null);
+        } catch (err) {
+            setShowDeleteModal(false);
+            if (err.response && err.response.data && err.response.data.message) {
+                setError(err.response.data.message);
+            } else {
+                setError("Une erreur est survenue lors de la suppression.");
             }
         }
     };
@@ -75,15 +89,35 @@ const Professeurs = () => {
                                     </td>
                                     <td className="text-secondary">{prof.email}</td>
                                     <td className="text-end pe-4">
-                                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(prof.id)} className="rounded-pill">Supprimer</Button>
+                                        <Button variant="danger" size="sm" onClick={() => handleDeleteClick(prof.id)} className="rounded-pill">Supprimer</Button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </Table>
                 </Card.Body>
+
             </Card>
-        </Container>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title className="text-danger fw-bold">Confirmer la suppression</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Voulez-vous vraiment supprimer ce professeur ?</p>
+                    <p className="text-muted small"><strong>Attention :</strong> Cela supprimera également toutes les notes saisies par ce professeur.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Annuler
+                    </Button>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Supprimer
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </Container >
     );
 };
 

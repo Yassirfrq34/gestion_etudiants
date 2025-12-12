@@ -35,6 +35,22 @@ const Layout = () => {
                                 </>
                             )}
 
+                            {role === 'etudiant' && (
+                                <>
+                                    <Nav.Link onClick={() => navigate('/espace-etudiant')} className="fw-semibold mx-2">Accueil</Nav.Link>
+                                    <Nav.Link onClick={() => navigate('/mon-planning')} className="fw-semibold mx-2">Mon Planning</Nav.Link>
+                                    <Nav.Link onClick={() => navigate('/notes')} className="fw-semibold mx-2">Mes Notes</Nav.Link>
+                                </>
+                            )}
+
+                            {role === 'professeur' && (
+                                <>
+                                    <Nav.Link onClick={() => navigate('/espace-professeur')} className="fw-semibold mx-2">Accueil</Nav.Link>
+                                    <Nav.Link onClick={() => navigate('/etudiants')} className="fw-semibold mx-2">Liste Étudiants</Nav.Link>
+                                    <Nav.Link onClick={() => navigate('/saisie-notes')} className="fw-semibold mx-2">Saisie Notes</Nav.Link>
+                                </>
+                            )}
+
                             {token ? (
                                 <Button variant="outline-danger" size="sm" className="ms-3 rounded-pill px-3" onClick={handleLogout}>
                                     Déconnexion

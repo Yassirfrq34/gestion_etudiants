@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Alert, Card } from 'react-bootstrap';
+import { Container, Table, Button, Alert, Card, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Etudiants = () => {
     const [etudiants, setEtudiants] = useState([]);
     const [error, setError] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,17 +23,25 @@ const Etudiants = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Voulez-vous vraiment supprimer cet étudiant ?')) {
-            try {
-                await axios.delete(`http://localhost:8000/api/etudiants/${id}`);
-                setEtudiants(etudiants.filter(etudiant => etudiant.id !== id));
-            } catch (err) {
-                if (err.response && err.response.data && err.response.data.message) {
-                    setError(err.response.data.message);
-                } else {
-                    setError(err.message);
-                }
+    const handleDeleteClick = (id) => {
+        setStudentToDelete(id);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!studentToDelete) return;
+
+        try {
+            await axios.delete(`http://localhost:8000/api/etudiants/${studentToDelete}`);
+            setEtudiants(etudiants.filter(etudiant => etudiant.id !== studentToDelete));
+            setShowDeleteModal(false);
+            setStudentToDelete(null);
+        } catch (err) {
+            setShowDeleteModal(false);
+            if (err.response && err.response.data && err.response.data.message) {
+                setError(err.response.data.message);
+            } else {
+                setError(err.message);
             }
         }
     };
@@ -79,8 +89,9 @@ const Etudiants = () => {
                                     </td>
                                     <td className="text-secondary">{etudiant.email}</td>
                                     <td className="text-end pe-4">
-                                        {/* <Button variant="outline-warning" size="sm" className="me-2 rounded-pill">Modifier</Button> */}
-                                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(etudiant.id)} className="rounded-pill">Supprimer</Button>
+                                        {localStorage.getItem('role') === 'admin' && (
+                                            <Button variant="danger" size="sm" onClick={() => handleDeleteClick(etudiant.id)} className="rounded-pill">Supprimer</Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -88,6 +99,25 @@ const Etudiants = () => {
                     </Table>
                 </Card.Body>
             </Card>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title className="text-danger fw-bold">Confirmer la suppression</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Voulez-vous vraiment supprimer cet étudiant ?</p>
+                    <p className="text-muted small">Cette action est irréversible et supprimera également ses notes et son emploi du temps.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Annuler
+                    </Button>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Supprimer
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };
