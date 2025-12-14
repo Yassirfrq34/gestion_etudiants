@@ -15,6 +15,7 @@ import EspaceEtudiant from './components/EspaceEtudiant';
 import EspaceProfesseur from './components/EspaceProfesseur';
 import SaisieNotes from './components/SaisieNotes';
 import MonPlanning from './components/MonPlanning';
+import Emploi from './components/Emploi';
 
 import Layout from './components/Layout';
 
@@ -40,7 +41,9 @@ function App() {
           <Route path="/etudiants" element={<Etudiants />} />
           <Route path="/etudiants/ajouter" element={<AddEtudiant />} />
 
+
           <Route path="/mon-planning" element={<MonPlanning />} />
+          <Route path="/admin/planning" element={<Emploi />} />
 
           <Route path="/professeurs" element={<Professeurs />} />
           <Route path="/professeurs/ajouter" element={<AddProfesseur />} />

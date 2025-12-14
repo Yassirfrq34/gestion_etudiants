@@ -1,28 +1,46 @@
-import React from 'react';
-import { Container, Table, Card, Badge, Row, Col } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Table, Card, Badge, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import axios from 'axios';
 
 const Notes = () => {
     const user = JSON.parse(localStorage.getItem('user')) || { nom: 'Étudiant', prenom: 'Inconnu', id: 'N/A' };
 
-    // Mock Data: 1 Student, Multiple Grades
+    const [notes, setNotes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
     const studentInfo = {
-        name: `${user.prenom} ${user.nom}`, // Dynamic Name
-        id: `ETU-${user.id || '2023'}`,
+        name: `${user.prenom} ${user.nom}`,
+        id: `ETU-${user.id || 'N/A'}`,
         class: "Licence 2 - Informatique"
     };
 
-    const grades = [
-        { subject: "Algorithmique", grade: 15, date: "2023-10-15" },
-        { subject: "Bases de Données", grade: 12, date: "2023-10-20" },
-        { subject: "Développement Web", grade: 18, date: "2023-10-22" },
-        { subject: "Mathématiques", grade: 8, date: "2023-11-05" },
-        { subject: "Anglais Technique", grade: 14, date: "2023-11-10" },
-        { subject: "Systèmes d'exploitation", grade: 9.5, date: "2023-11-15" },
-        { subject: "Réseaux", grade: 13, date: "2023-11-18" },
-    ];
+    useEffect(() => {
+        fetchNotes();
+    }, []);
+
+    const fetchNotes = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/notes');
+            // Filter notes for the current student
+            const myNotes = response.data.filter(n => n.etudiant_id === user.id);
+            setNotes(myNotes);
+        } catch (error) {
+            console.error("Erreur lors du chargement des notes", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Calculate Average
-    const average = (grades.reduce((acc, curr) => acc + curr.grade, 0) / grades.length).toFixed(2);
+    const uniqueSubjects = [...new Set(notes.map(n => n.matiere_id))];
+    const canShowAverage = uniqueSubjects.length >= 7;
+
+    // Average calculation: Sum of all grades / Total number of grades
+    // Note: If you want average per subject first, logic needs to change.
+    // Assuming 1 grade per subject for now or simple average of all marks.
+    const average = notes.length > 0
+        ? (notes.reduce((acc, curr) => acc + parseFloat(curr.valeur), 0) / notes.length).toFixed(2)
+        : "N/A";
 
     return (
         <Container className="mt-5 mb-5">
@@ -38,7 +56,15 @@ const Notes = () => {
                         </div>
                         <div className="text-end">
                             <span className="d-block text-uppercase small opacity-75">Moyenne Générale</span>
-                            <span className="display-6 fw-bold">{average}/20</span>
+                            {/* Logic: Only show average if 7 subjects have marks */}
+                            {canShowAverage ? (
+                                <span className="display-6 fw-bold">{average}/20</span>
+                            ) : (
+                                <div>
+                                    <span className="fs-5 fw-bold text-white-50">En attente</span>
+                                    <div className="small opacity-50">{uniqueSubjects.length}/7 matières notées</div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -55,23 +81,23 @@ const Notes = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {grades.map((item, index) => (
+                            {notes.map((item, index) => (
                                 <tr key={index}>
                                     <td className="ps-4 fw-semibold text-dark">
-                                        {item.subject}
+                                        {item.matiere ? item.matiere.nom : 'Matière inconnue'}
                                     </td>
                                     <td className="text-secondary small">
-                                        {new Date(item.date).toLocaleDateString('fr-FR')}
+                                        {new Date(item.created_at).toLocaleDateString('fr-FR')}
                                     </td>
                                     <td>
                                         {/* Dynamic Badge Color */}
-                                        <Badge bg={item.grade >= 10 ? 'success' : 'danger'} pill>
-                                            {item.grade >= 10 ? 'Validé' : 'Non Validé'}
+                                        <Badge bg={item.valeur >= 10 ? 'success' : 'danger'} pill>
+                                            {item.valeur >= 10 ? 'Validé' : 'Non Validé'}
                                         </Badge>
                                     </td>
                                     <td className="text-end pe-4 fw-bold">
-                                        <span className={item.grade >= 10 ? 'text-success' : 'text-danger'}>
-                                            {item.grade}
+                                        <span className={item.valeur >= 10 ? 'text-success' : 'text-danger'}>
+                                            {item.valeur}
                                         </span>
                                         <span className="text-muted small">/20</span>
                                     </td>

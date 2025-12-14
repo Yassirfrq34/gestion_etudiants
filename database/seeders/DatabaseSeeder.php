@@ -8,17 +8,28 @@ use App\Models\Professeur;
 use App\Models\Matiere;
 use App\Models\Note;
 use App\Models\Planning;
+use App\Models\Administrateur;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         // Création du compte Admin principal
-        \App\Models\User::create([
-            'name' => 'Admin Principal',
+        $admin1 = Administrateur::create([
+            'nom' => 'Admin Principal',
             'email' => 'admin@gmail.com',
-            'password' => bcrypt('password')
+            'mot_de_passe' => 'password'
         ]);
+
+        $admin2 = Administrateur::create([
+            'nom' => 'Admin Principal',
+            'email' => 'admin1@gmail.com',
+            'mot_de_passe' => 'password'
+        ]);
+
+
 
         // Ajout des matières enseignées
         $math = Matiere::create(['nom' => 'Mathématiques']);

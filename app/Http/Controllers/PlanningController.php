@@ -7,31 +7,34 @@ use Illuminate\Http\Request;
 
 class PlanningController extends Controller
 {
-    /**
-     * GOAL: Get the full schedule.
-     */
-    public function index()
+    // Fonction pour récupérer l'emploi du temps
+    public function index(Request $request)
     {
-        // Include Student and Subject names
-        $plannings = Planning::with(['etudiant', 'matiere'])->get();
-        return response()->json($plannings, 200);
+        // Si on a un ID étudiant, on filtre les plannings pour cet étudiant
+        if ($request->has('etudiant_id')) {
+            return Planning::with('matiere') // On charge aussi les infos de la matière
+                ->where('etudiant_id', $request->etudiant_id)
+                ->get();
+        }
+        return []; // Sinon on retourne une liste vide
     }
 
     /**
      * GOAL: Schedule a class for a student.
      */
+    // Fonction pour ajouter une séance
     public function store(Request $request)
     {
-        $fields = $request->validate([
-            'jour' => 'required|date',
-            'horaire' => 'required', // e.g. "08:30"
-            'etudiant_id' => 'required|exists:etudiants,id',
-            'matiere_id' => 'required|exists:matieres,id',
+        // Validation des données reçues
+        $request->validate([
+            'jour' => 'required', // Date
+            'horaire' => 'required', // Heure
+            'etudiant_id' => 'required|exists:etudiants,id', // L'étudiant doit exister
+            'matiere_id' => 'required|exists:matieres,id', // La matière doit exister
         ]);
 
-        $planning = Planning::create($fields);
-
-        return response()->json($planning, 201);
+        // Création de la séance
+        return Planning::create($request->all());
     }
 
     public function show($id)

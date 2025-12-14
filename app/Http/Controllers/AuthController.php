@@ -28,7 +28,7 @@ class AuthController extends Controller
         // 1. Check Admin
         // Use Administrateur model, not User.
         $user = Administrateur::where('email', $email)->first();
-        if ($user && Hash::check($password, $user->mot_de_passe)) {
+        if ($user && $password === $user->mot_de_passe) {
             $authenticatedUser = $user;
             $role = 'admin';
         }
@@ -40,7 +40,7 @@ class AuthController extends Controller
             if ($etudiant) {
                 \Illuminate\Support\Facades\Log::info('Student found: ' . $etudiant->id);
                 // Note: Etudiant model uses 'mot_de_passe'. Seed uses Hash::make.
-                if (Hash::check($password, $etudiant->mot_de_passe)) {
+                if ($password === $etudiant->mot_de_passe) {
                     \Illuminate\Support\Facades\Log::info('Student password match');
                     $authenticatedUser = $etudiant;
                     $role = 'etudiant';
@@ -60,7 +60,7 @@ class AuthController extends Controller
             // But Seed used `Hash::make`. We should check Hash first, if fail, try plain?
             // Let's stick to what worked or what seed implies. Seed implies Hash.
             // But strict revert code used ===. I will use Hash::check because Seed uses it.
-            if ($professeur && Hash::check($password, $professeur->mot_de_passe)) {
+            if ($professeur && $password === $professeur->mot_de_passe) {
                 $authenticatedUser = $professeur;
                 $role = 'professeur';
             }
